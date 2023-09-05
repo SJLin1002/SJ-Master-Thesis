@@ -4,6 +4,19 @@ import random
 import matplotlib.pyplot as plt
 import keyboard
 import time
+import threading
+
+running = True
+
+def checkKeyInput ():
+    global running
+    while (running):
+        if keyboard.read_key() == "p":
+            print("You pressed p")
+            running = False
+
+t = threading.Thread(target = checkKeyInput)
+t.start()
 
 # # 按按鈕
 # while True:
@@ -25,7 +38,7 @@ for i  in range(1,car_num+1):
     car.append([x,y,v])  # 將新的 [x, y, v] 值添加到 car 列表
 print(car_num,"台車" , "座標為" , car)
 t=1
-while True:
+while running:
     
     for j  in range(0,car_num):    
         car[j][0] = round((car[j][0] + car[j][2]),3)  #車輛X座標改變
@@ -39,20 +52,13 @@ while True:
         New_v = car[j][2] * (1+a)
         car[j][2] = round(New_v,3) #更改車輛速度
     print(car_num,"台車Time", t , "座標為" , car)
-    if keyboard.read_key() == "p":
-        print("You pressed p")
-        break
+    # if keyboard.read_key() == "p":
+    #     print("You pressed p")
+    #     break
     time.sleep(1)
     t+=1
     
-print("A")       
-
-
-while True:
-
-    print("A")
-    time.sleep(1)
-
+print("A")
         
 
 ''' 
