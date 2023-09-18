@@ -113,9 +113,10 @@ def kmeans(data):
 
 # 模擬時間循環
 def sim(data,location_UAV):
-    time_step =1
+    time_step = .5
+    times = 1
     while True:
-        print(f"Time {time_step}:", time_step + delaytTime,"秒")
+        print(f"Time {times}:", time_step + delaytTime,"秒")
         
         # 更新车辆位置
         data =simulation_change_car_data(data)
@@ -134,12 +135,14 @@ def sim(data,location_UAV):
         if location_UAV[0] > center_point[0]:
             print("sim",time_step + delaytTime," OKOK") 
             break
-        time_step+=1
+        time_step+=.5
+        times+=1
         time.sleep(0.5)
     print("")
 # 實際時間循環
 def act(data,location_UAV):
-    time_step =1
+    time_step = 0.5
+    times  = 1
     while True:
         print(f"Time {time_step}:", time_step + delaytTime,"秒")
         
@@ -160,19 +163,18 @@ def act(data,location_UAV):
         if location_UAV[0] > center_point[0]:
             print("act",time_step + delaytTime," OKOK") 
             break
-        time_step+=1
+        time_step+=0.5
+        times += 1
         time.sleep(0.5)
     print("")
 
-
-car_num=30
+#initial
+car_num = 5
 O_data=create_car(car_num)
 dataS = copy.deepcopy(O_data)
 dataA = copy.deepcopy(O_data)   
 
 print("初始車輛位置 : ",O_data) 
-
-
 #無人機時速126km/hr(35m/s)
 V_UAV=35
 delaytTime = 3 #(s)
@@ -188,7 +190,7 @@ for i in range(1, int(delaytTime/0.5)+1):
     # 在每段時間，找到車輛中心點
     center_point = kmeans(dataS)
     # print(f"CenterPoint at Time {i}:", center_point)
-print("Time 0:",delaytTime )
+print("Time 0:",delaytTime,"s" )
 print("Updated Car Positions at Time 1:", dataS)
 print("CenterPoint:", center_point)
 
