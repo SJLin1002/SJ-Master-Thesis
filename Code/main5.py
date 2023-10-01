@@ -3,7 +3,6 @@ import time
 import copy
 import openpyxl
 from openpyxl.styles import Alignment
-from openpyxl.utils import get_column_letter
 
 
 
@@ -34,6 +33,12 @@ def actual_change_car_data(dataA):
         car[2] = round(New_v,3) 
     # print(data)
     return dataA
+
+def simulation_change_car_data(dataS):
+    for car in dataS:
+        #車輛X座標改變
+        car[0] = round((car[0] + car[2]),3)        
+    return dataS
 
 def kmeans(data):
     #kmeans 
@@ -91,10 +96,15 @@ def kmeans(data):
     return center_point        
 
 def act(data,location_UAV):
-    time_step = 0.5
+    time_step = 0
     times  = 1
     #經delaytime，車子的位置及車輛中心點
-    print("初始中心點 :", kmeans(data))
+    initial_center= kmeans(data)
+    d=((location_UAV[0]-initial_center[0])**2+(location_UAV[1]-initial_center[1])**2)**0.5
+    sheet['B2'] = 0 
+    sheet['C2'] = d
+    print("初始中心點 :", initial_center)
+    
     for i in range(1, int(delaytTime/0.5)+1):  
         # 更新車輛位置
     
@@ -104,15 +114,10 @@ def act(data,location_UAV):
         center_point = kmeans(data)
         # print(f"CenterPoint at Time {i}:", center_point)
     
-    sheet['A1'] = "Time"
-    
-    sheet.merge_cells('B1:C1')
-    sheet['B1'] = "Act"
-    sheet['A2'] = 0
     
     print()
     print("Time 0 :",delaytTime,"s" )
-    print("Updated Car Positions at Time 0:", data)
+    # print("Updated Car Positions at Time 0:", data)
     print("車輛中心點 :", center_point)
     print("無人機位置 :",location_UAV)
     print()
@@ -135,7 +140,7 @@ def act(data,location_UAV):
         print("無人機位置 : ",location_UAV)
         # 無人機與車輛中心點距離
         d=((location_UAV[0]-center_point[0])**2+(location_UAV[1]-center_point[1])**2)**0.5
-        print("距離 :",d)
+        print("A距離 :",d)
 
         #在Excel 紀錄秒數和距離
         sheet['B'+ str(times+2)] = time_step + delaytTime
@@ -150,33 +155,158 @@ def act(data,location_UAV):
         print()
     return time_step + delaytTime
 
+# 模擬時間循環
+def sim(data,location_UAV):
+    time_step = 0
+    times = 1
+
+    #經delaytime，車子的位置及車輛中心點
+    initial_center= kmeans(data)
+    d=((location_UAV[0]-initial_center[0])**2+(location_UAV[1]-initial_center[1])**2)**0.5
+    sheet['D2'] = 0 
+    sheet['E2'] = d
+    print("初始中心點 :", initial_center)
+
+    
+    for i in range(1, int(delaytTime/0.5)+1): 
+        # 更新車輛位置
+        data = simulation_change_car_data(data)
+        # 在每段時間，找到車輛中心點
+        center_point = kmeans(data)
+        # print(f"CenterPoint at Time {i}:", center_point)
+    
+    
+   
+    print()
+    print("Time 0:",delaytTime,"s" )
+    # print("Updated Car Positions at Time 0:", data)
+    print("CenterPoint:", center_point)
+    print("無人機位置 :",location_UAV)
+    print()
+
+    while True:
+        sheet['A'+ str(times+2)] = times
+        print(f"Time {times}:", time_step + delaytTime,"秒")
+        
+        # 更新車輛位置
+        data =simulation_change_car_data(data)
+        # print(f"Updated Car Positions at Time {time_step}:", data)
+        
+        # 車輛位置的中心點
+        center_point = kmeans(data)
+        print(f"CenterPoint at Time {times}:", center_point)
+
+
+        location_UAV=((location_UAV[0]+location_UAV[2]),location_UAV[1],location_UAV[2])
+        print("無人機位置 : ",location_UAV)
+        # 無人機與車輛中心點距離
+        d=((location_UAV[0]-center_point[0])**2+(location_UAV[1]-center_point[1])**2)**0.5
+        print("S距離 :",d)
+
+        #在Excel 紀錄秒數和距離
+        sheet['D'+ str(times+2)] = time_step + delaytTime
+        sheet['E'+ str(times+2)] = d
+
+        # if d<5:
+        if location_UAV[0] > center_point[0]:
+            print("sim",time_step + delaytTime,"秒 OKOK") 
+            break
+        time_step += 0.5
+        times+=1
+        # time.sleep(0.5)
+        print()
+    return time_step + delaytTime
+
+def nopred(data,location_UAV):
+    time_step = 0.5
+    times  = 1
+
+    initial_center= kmeans(data)
+    d=((location_UAV[0]-initial_center[0])**2+(location_UAV[1]-initial_center[1])**2)**0.5
+    sheet['F2'] = 0 
+    sheet['G2'] = d
+    print("初始中心點 :", initial_center)
+
+    print()
+    print("Time 0:",time_step,"s" )
+    # print("Updated Car Positions at Time 0:", data)
+    print("CenterPoint:", initial_center)
+    print("無人機位置 :",location_UAV)
+    print()
+
+    while True:
+        sheet['A'+ str(times+2)] = times
+        print(f"Time {times}:", time_step,"秒")
+        
+        # 更新車輛位置
+        data =simulation_change_car_data(data)
+        # print(f"Updated Car Positions at Time {time_step}:", data)
+        
+        # 車輛位置的中心點
+        center_point = kmeans(data)
+        print(f"CenterPoint at Time {times}:", center_point)
+
+
+        location_UAV=((location_UAV[0]+location_UAV[2]),location_UAV[1],location_UAV[2])
+        print("無人機位置 : ",location_UAV) 
+        # 無人機與車輛中心點距離
+        d=((location_UAV[0]-center_point[0])**2+(location_UAV[1]-center_point[1])**2)**0.5
+        print("N距離 :",d)
+
+        #在Excel 紀錄秒數和距離
+        sheet['F'+ str(times+2)] = time_step 
+        sheet['G'+ str(times+2)] = d
+
+        # if d<5:
+        if location_UAV[0] > center_point[0]:
+            print("nopred ",time_step," OKOK") 
+            break
+        time_step+=0.5
+        times+=1
+        # time.sleep(0.5)
+        print()
+    return time_step
 
 
 #使用openpyxl 內 Workbook 方法建立一個新的工作簿
 workbook = openpyxl.Workbook()
 #取得第一個工作表
 sheet = workbook.worksheets[0]
+sheet['A1'] = "Time"
+sheet['A2'] = 0
+sheet.merge_cells('B1:C1')
+sheet.merge_cells('D1:E1')
+sheet.merge_cells('F1:G1')
+sheet['B1'] = "Act"
+sheet['D1'] = "Sim"
+sheet['F1'] = "Nopred"
 
 
-
-car_num = 5
+car_num = 10
 O_data=create_car(car_num)
 dataS = copy.deepcopy(O_data)
 dataA = copy.deepcopy(O_data)   
+dataN = copy.deepcopy(O_data)
 
 print("初始車輛位置 : ",O_data) 
+print()
 #無人機時速126km/hr(35m/s)
 V_UAV = 35
 delaytTime = 3 #(s)
 location_UAV=(0,0,V_UAV)  #無人機初始位置
 
 act = act(dataA,location_UAV)
-
+print()
+sim = sim(dataS,location_UAV)
+print()
+nopred = nopred(dataN,location_UAV)
 
 print("act: ",act,"秒")
+print("sim: ",sim,"秒")
+print("nopred",nopred,"秒")
 
 for i in range(1,sheet.max_row):
     for j in range(1,sheet.max_column):
         sheet.cell(row=i+1,column=j+1).alignment=Alignment(vertical='center',   horizontal='center') 
         # sheet[str([i-1][j-1])].alignment=Alignment(vertical='center', horizontal='left') 
-workbook.save('test1.xlsx')
+workbook.save('data_Compare .xlsx')
