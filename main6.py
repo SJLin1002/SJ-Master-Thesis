@@ -122,30 +122,54 @@ V_UAV = 35
 delaytTime = 3 #(s)
 location_UAV=(0,0,V_UAV)  #無人機初始位置
 Num = 0
-lock1 = 0
-lock2 = 0
-while Num<20 : 
+lockA = 0
+lockS = 0
+while True : 
     print("Num :",Num)
-    a = act(dataA)
-    print("act : ",a)
-    s = sim(dataS)
-    print("sim : ",s)
+
     if Num>delaytTime:
         location_UAV = uav(location_UAV)
     print("UAV : ",location_UAV)
+
+    if lockA == 0 :
+        a = act(dataA)
+        print("act : ",a)
+        if a[0] < location_UAV[0] :
+            lockA = 1
+            dA = a[0]
+            print("okok")
+    else : 
+        print("act : ",a,"okok")
+
+            
+    
+
+    if lockS == 0 : 
+        s = sim(dataS)
+        print("sim : ",s)
+        if s[0] < location_UAV[0] :
+            lockS = 1
+            dS = s[0]
+            print("okok")
+    else : 
+        print("sim : ",s,"okok")
+    
+
+    
     print()
    
     # 無人機追上實際
-    if a[0] < location_UAV[0] :
-        
-        lock1 = 1
-    if s[0] < location_UAV[0] :
-        
-        lock2 = 1
-    if ((lock1 == 1) and (lock2 == 1)) :
+    
+    if ((lockA == 1) and (lockS == 1)) :
+        D = abs(dA-dS)
+        print("D = ",D)
         break
 
     Num += 1
+
+
+
+
 
 
 
