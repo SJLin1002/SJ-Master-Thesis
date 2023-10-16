@@ -110,6 +110,61 @@ def uav(location_UAV):
     location_UAV = (location_UAV[0]+location_UAV[2],location_UAV[1],location_UAV[2])
     return location_UAV
 
+def d1(delaytTime,location_UAV):
+    Num = 0
+    lockA = 0
+    lockS = 0
+    print("Num :",Num)
+    print("UAV : ",location_UAV)
+    o = kmeans(O_data)
+    print("act : ",o)
+    print("sim : ",o)
+    
+    Num+=1
+    while True : 
+        
+        print("Num :",Num)
+
+        if Num>delaytTime:
+            location_UAV = uav(location_UAV)
+        print("UAV : ",location_UAV)
+
+        if lockA == 0 :
+            a = act(dataA)
+            print("act : ",a)
+            if a[0] < location_UAV[0] :
+                lockA = 1
+                dA = a[0]
+                print("okok")
+        else : 
+            print("act : ",a,"okok")
+
+                
+        
+
+        if lockS == 0 : 
+            s = sim(dataS)
+            print("sim : ",s)
+            if s[0] < location_UAV[0] :
+                lockS = 1
+                dS = s[0]
+                print("okok")
+        else : 
+            print("sim : ",s,"okok")
+        
+
+        
+        print()
+    
+        # 無人機追上實際
+        
+        if ((lockA == 1) and (lockS == 1)) :
+            D = abs(dA-dS)
+            # print("D = ",D)
+            break
+
+        Num += 1
+    return D
 
 
 car_num = 10
@@ -121,55 +176,6 @@ dataS = copy.deepcopy(O_data)
 V_UAV = 35
 delaytTime = 3 #(s)
 location_UAV=(0,0,V_UAV)  #無人機初始位置
-Num = 0
-lockA = 0
-lockS = 0
-while True : 
-    print("Num :",Num)
 
-    if Num>delaytTime:
-        location_UAV = uav(location_UAV)
-    print("UAV : ",location_UAV)
-
-    if lockA == 0 :
-        a = act(dataA)
-        print("act : ",a)
-        if a[0] < location_UAV[0] :
-            lockA = 1
-            dA = a[0]
-            print("okok")
-    else : 
-        print("act : ",a,"okok")
-
-            
-    
-
-    if lockS == 0 : 
-        s = sim(dataS)
-        print("sim : ",s)
-        if s[0] < location_UAV[0] :
-            lockS = 1
-            dS = s[0]
-            print("okok")
-    else : 
-        print("sim : ",s,"okok")
-    
-
-    
-    print()
-   
-    # 無人機追上實際
-    
-    if ((lockA == 1) and (lockS == 1)) :
-        D = abs(dA-dS)
-        print("D = ",D)
-        break
-
-    Num += 1
-
-
-
-
-
-
-
+d1 = d1(delaytTime,location_UAV)
+print("D = ",d1)

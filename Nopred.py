@@ -1,7 +1,6 @@
 
 # 無預測
 import random
-import time
 import copy
 
 
@@ -81,18 +80,19 @@ def constant_speed(data,time):
     #車輛在時間time後的位置
     for car in data:
         car[0] = round(car[0] + (car[2] * time))
+    return data
 
 
 
 car_num = 10
-O_data=create_car(car_num)
-# O_data = [[36, 0, 19], [88, 3, 22], [53, 3, 20], [65, 3, 16], [18, 3, 18], [24, 3, 21], [92, 3, 27], [37, 3, 23], [91, 0, 26], [50, 3, 24]]
+# O_data=create_car(car_num)
+O_data = [[36, 0, 19], [88, 3, 22], [53, 3, 20], [65, 3, 16], [18, 3, 18], [24, 3, 21], [92, 3, 27], [37, 3, 23], [91, 0, 26], [50, 3, 24]]
 dataN = copy.deepcopy(O_data)
-
 center_point = kmeans(dataN)
 V_UAV = 35
 #無人機時速126km/hr(35m/s)
 location_UAV=(0,0,V_UAV)  #無人機初始位置
+
 d =((location_UAV[0]-center_point[0])**2+(location_UAV[1]-center_point[1])**2)**0.5
 t = round(d/35,3)
 print("初始車輛位置 : ",O_data)
@@ -103,10 +103,10 @@ print("無人機飛行時間 :",t)
 
 
 #以0.5秒為單位，車子等速前進
-for i in range(0,int(t/0.5)):
-    dataN = simulation_change_car_data(dataN)
+# for i in range(0,int(t/0.5)):
+#     dataN = simulation_change_car_data(dataN)
 
-# constant_speed(dataN,t)
+dataN = constant_speed(dataN,t)
 
 New_center = kmeans(dataN)
 print("實際車輛中心點為 : ",New_center)  #k2

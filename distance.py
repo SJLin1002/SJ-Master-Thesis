@@ -100,16 +100,27 @@ def kmeans(data):
 
 
 def act(dataA,location_UAV):
+    i=1
+    while i < int(delaytTime/timeslot):
+        dataA = actual_change_car_data(dataA)
+        if i >= t/timeslot :
+            N_New_center = kmeans(dataA)
+
+        i+=1
+    
+
+
     timeA = delaytTime
+    
     #經過delaytime之後，車群位置(車速每0.1秒改變一次)
     for i in range(0,int(delaytTime/timeslot)):
         dataA = actual_change_car_data(dataA)
 
 
     while True :
-        center_point = kmeans(dataA)
+        center_pointA = kmeans(dataA)
         
-        d = ((center_point[0]-location_UAV[0])**2 + (center_point[1]-location_UAV[1])**2)**0.5
+        d = ((center_pointA[0]-location_UAV[0])**2 + (center_pointA[1]-location_UAV[1])**2)**0.5
         # 無人機飛過去需要t1的時間
         t1 = d/V_UAV 
 
@@ -117,13 +128,14 @@ def act(dataA,location_UAV):
             dataA = actual_change_car_data(dataA)
         timeA = timeA + t1
         print("act 時間 : ",timeA)
-        print("center_point : ",center_point,"UAV_location :",location_UAV)
+        print("center_point : ",center_pointA,"UAV_location :",location_UAV)
         print("距離 : ",d,"時間：",t1) 
         # 更新無人機位置
-        location_UAV = (center_point[0], center_point[1], location_UAV[2])
+        location_UAV = (center_pointA[0], center_pointA[1], location_UAV[2])
         print()
         if d<0.5:
             break
+    return N_New_center , center_pointA
 
 
 def sim(dataS,location_UAV):
@@ -131,22 +143,24 @@ def sim(dataS,location_UAV):
     dataS = constant_speed(dataS,delaytTime)
     timeS = delaytTime
     while True :
-        center_point = kmeans(dataS)
+        center_pointS = kmeans(dataS)
         
-        d = ((center_point[0]-location_UAV[0])**2 + (center_point[1]-location_UAV[1])**2)**0.5
+        d = ((center_pointS[0]-location_UAV[0])**2 + (center_pointS[1]-location_UAV[1])**2)**0.5
         # 無人機飛過去需要t1的時間
         t1 = d/V_UAV 
         
         dataS = constant_speed(dataS,t1)
         timeS = timeS + t1
         print("sim 時間 : ",timeS)
-        print("center_point : ",center_point,"UAV_location :",location_UAV)
+        print("center_point : ",center_pointS,"UAV_location :",location_UAV)
         print("距離 : ",d,"時間：",t1) 
         # 更新無人機位置
-        location_UAV = (center_point[0], center_point[1], location_UAV[2])
+        location_UAV = (center_pointS[0], center_pointS[1], location_UAV[2])
         print()
         if d<0.5:
             break
+    
+    return center_pointS
 
 #時間間隔
 timeslot = 0.1
@@ -161,11 +175,25 @@ O_data = [[36, 0, 19], [88, 3, 22], [53, 3, 20], [65, 3, 16], [18, 3, 18], [24, 
 dataA = copy.deepcopy(O_data)
 dataS = copy.deepcopy(O_data)
 
-sim(dataS,location_UAV)
+# 第一次位置(用於無預測)
+center_point = kmeans(O_data)
+d =((location_UAV[0]-center_point[0])**2+(location_UAV[1]-center_point[1])**2)**0.5
+t = round(d/35,3)
+
+sim = sim(dataS,location_UAV)
+act = act(dataA,location_UAV)
 
 
-act(dataA,location_UAV)
+
+# 這個(sim和act是追上的centerpoint)，不是(act追上後，sim的位置)
+d1 = ((sim[0]-act[1][0])**2+(sim[1]-act[1][1])**2)**0.5
 
 
 
+
+New_center = act[0]
+d2 = ((New_center[0]-center_point[0])**2+(New_center[1]-center_point[1])**2)**0.5
+
+print("d1 = ",d1)
+print("d2 = ",d2)
 
