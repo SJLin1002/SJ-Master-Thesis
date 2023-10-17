@@ -66,8 +66,18 @@ def kmeans(data):
                 node2=New_node2
     # print("A :",clusA,"Node1 :",New_node1)
     # print("B :",clusB,"Node2 :",New_node2) 
-    center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)    
-    return center_point       
+    close = 1000
+    for q in range(len(clusA)):
+        for w in range(len(clusB)):
+            dis = ((clusA[q][0]-clusB[w][0])**2+(clusA[q][1]-clusB[w][1])**2)**0.5
+            if dis < close :
+                close = dis
+                closeA = clusA[q]
+                closeB = clusB[w]
+    # center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)  
+    # print(closeA,closeB)
+    center_point = ((closeA[0]+closeB[0])/2, (closeA[1]+closeB[1])/2)
+    return center_point  
 
 def simulation_change_car_data(dataS):
     #車輛X座標等速改變

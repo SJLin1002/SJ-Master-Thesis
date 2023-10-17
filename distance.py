@@ -95,9 +95,18 @@ def kmeans(data):
                 node2=New_node2
     # print("A :",clusA,"Node1 :",New_node1)
     # print("B :",clusB,"Node2 :",New_node2) 
-    center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)    
-    return center_point    
-
+    close = 1000
+    for q in range(len(clusA)):
+        for w in range(len(clusB)):
+            dis = ((clusA[q][0]-clusB[w][0])**2+(clusA[q][1]-clusB[w][1])**2)**0.5
+            if dis < close :
+                close = dis
+                closeA = clusA[q]
+                closeB = clusB[w]
+    # center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)  
+    # print(closeA,closeB)
+    center_point = ((closeA[0]+closeB[0])/2, (closeA[1]+closeB[1])/2)
+    return center_point
 
 def act(dataA,location_UAV):
     i=1
@@ -133,9 +142,9 @@ def act(dataA,location_UAV):
         # 更新無人機位置
         location_UAV = (center_pointA[0], center_pointA[1], location_UAV[2])
         print()
-        if d<0.5:
+        if d<=1:
             break
-    return N_New_center , center_pointA
+    return N_New_center , center_pointA ,timeA
 
 
 def sim(dataS,location_UAV):
@@ -157,13 +166,14 @@ def sim(dataS,location_UAV):
         # 更新無人機位置
         location_UAV = (center_pointS[0], center_pointS[1], location_UAV[2])
         print()
-        if d<0.5:
+        if d<=1:
             break
     
-    return center_pointS
+    return center_pointS , timeS
 
 #時間間隔
 timeslot = 0.1
+
 V_UAV = 35
 delaytTime = 3 #(s)
 location_UAV=(0,0,V_UAV)  #無人機初始位置
@@ -186,9 +196,12 @@ act = act(dataA,location_UAV)
 
 
 # 這個(sim和act是追上的centerpoint)，不是(act追上後，sim的位置)
-d1 = ((sim[0]-act[1][0])**2+(sim[1]-act[1][1])**2)**0.5
+d1 = ((sim[0][0]-act[1][0])**2+(sim[0][1]-act[1][1])**2)**0.5
 
-
+print("sim_location :",sim[0])
+print("sim_time :",sim[1])
+print("act_location :",act[1])
+print("act_time:",act[2])
 
 
 New_center = act[0]

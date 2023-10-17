@@ -3,8 +3,8 @@
 import random
 import time
 import copy
-# import openpyxl
-# # from openpyxl.styles import Alignment
+import openpyxl
+from openpyxl.styles import Alignment
 
 
 def all():
@@ -101,8 +101,18 @@ def all():
                     node2=New_node2
         # print("A :",clusA,"Node1 :",New_node1)
         # print("B :",clusB,"Node2 :",New_node2) 
-        center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)    
-        return center_point      
+        close = 1000
+        for q in range(len(clusA)):
+            for w in range(len(clusB)):
+                dis = ((clusA[q][0]-clusB[w][0])**2+(clusA[q][1]-clusB[w][1])**2)**0.5
+                if dis < close :
+                    close = dis
+                    closeA = clusA[q]
+                    closeB = clusB[w]
+        # center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)  
+        # print(closeA,closeB)
+        center_point = ((closeA[0]+closeB[0])/2, (closeA[1]+closeB[1])/2)
+        return center_point   
 
     def act(dataA):
         # 更新車輛位置(1秒)
@@ -153,7 +163,6 @@ def all():
             else : 
                 print("sim : ",s,"okok")
             
-
             
             print()
         
@@ -197,7 +206,7 @@ def all():
     car_num = 10
     O_data=create_car(car_num)
     # O_data = [[36, 0, 19], [88, 3, 22], [53, 3, 20], [65, 3, 16], [18, 3, 18], [24, 3, 21], [92, 3, 27], [37, 3, 23], [91, 0, 26], [50, 3, 24]]
-
+    # timeslot = 0.1
     dataA = copy.deepcopy(O_data)
     dataS = copy.deepcopy(O_data)  
     dataN = copy.deepcopy(O_data)
@@ -207,7 +216,8 @@ def all():
     d1 = d1(delaytTime,location_UAV)
 
     d2 = d2(dataN)
-    d=abs(d1-d2)
+    # d=abs(d1-d2)
+    d=d1-d2
     print("D1 = ",d1)
 
     print("D2 = ",d2) 
@@ -215,6 +225,20 @@ def all():
     print("D1 - D2 = ",d)   
 
     return d1,d2,d
+#使用openpyxl 內 Workbook 方法建立一個新的工作簿
+workbook = openpyxl.Workbook()
+#取得第一個工作表
+sheet = workbook.worksheets[0]
+sheet['A1'] = "模擬"
+sheet['B1'] = "無預測"
+sheet['C1'] = "D1 - D2"
+
+for i in range(2,12):
+    k = all()
+    sheet['A'+str(i)] = k[0]
+    sheet['B'+str(i)] = k[1]
+    sheet['C'+str(i)] = k[2]
 
 
+workbook.save('D .xlsx')
 
