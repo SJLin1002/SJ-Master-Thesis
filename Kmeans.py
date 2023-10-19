@@ -1,5 +1,6 @@
 import random
 
+# 兩點中點(新)
 def kmeans(data):
     #kmeans 
     # clusters=2，隨機生成兩點
@@ -65,7 +66,20 @@ def kmeans(data):
     center_point = ((closeA[0]+closeB[0])/2, (closeA[1]+closeB[1])/2)
     return center_point     
 
-O_data = [[36, 0, 19], [37, 3, 22], [38, 3, 20], [39, 3, 16], [40, 3, 18], [41, 3, 21], [42, 3, 27], [43, 3, 23], [44, 0, 26], [45, 3, 24]]
+#一開始的車子位置data
+def create_car(car_num): 
+    data = []
+    for i in range(car_num):
+        # data增加car_count台車,[x,y,v]copy
+        data.append(
+            [random.randint(0, 100), random.choice((0, 3)), random.randint(15, 30)]
+            #車輛時速54~108km/hr(15~30m/s)
+        )
+    return data
+
+# O_data = [[36, 0, 19], [37, 3, 22], [38, 3, 20], [39, 3, 16], [40, 3, 18], [41, 3, 21], [42, 3, 27], [43, 3, 23], [44, 0, 26], [45, 3, 24]]
+car_num = 10
+O_data =create_car(car_num)
 
 
 p = kmeans(O_data)

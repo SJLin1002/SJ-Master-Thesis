@@ -1,8 +1,8 @@
-
-# 無預測
 import random
+import time
 import copy
-
+import openpyxl
+from openpyxl.styles import Alignment
 
 def create_car(car_num): 
     data = []
@@ -13,6 +13,31 @@ def create_car(car_num):
             #車輛時速54~108km/hr(15~30m/s)
         )
     return data
+
+#更新data,1秒?! 
+def actual_change_car_data(dataA):
+    for car in dataA:
+        #車輛X座標改變
+        car[0] = round((car[0] + car[2]),3)  
+        k = random.random()
+        #更改Y(車道) 80%改變車道
+        if k > 0.2 :
+            if car[1] == 0:
+                car[1] = 3
+            else: car[1] = 0      
+        #改變車輛速度  (10% ~ -10%)
+        a = random.uniform(0.1,-0.1) 
+        New_v = car[2] * (1+a)
+        car[2] = round(New_v,3) 
+    # print(data)
+    return dataA
+
+def simulation_change_car_data(dataS):
+    for car in dataS:
+        #車輛X座標改變
+        car[0] = round((car[0] + car[2]),3)        
+    return dataS
+
 # 兩點中點(新)
 def kmeans(data):
     #kmeans 
@@ -77,51 +102,91 @@ def kmeans(data):
     # center_point = ((node1[0]+node2[0])/2,(node1[1]+node2[1])/2)  
     # print(closeA,closeB)
     center_point = ((closeA[0]+closeB[0])/2, (closeA[1]+closeB[1])/2)
-    return center_point  
+    return center_point      
 
-def simulation_change_car_data(dataS):
-    #車輛X座標等速改變
-    #每0.5秒車子改變速度
-    for car in dataS:
-         car[0] = round((car[0] + (car[2]/2)),3)        
-    return dataS
 
-def constant_speed(data,time):
-    #車輛在時間time後的位置
-    for car in data:
-        car[0] = round(car[0] + (car[2] * time))
-    return data
+def act(dataA):
+    # 更新車輛位置(1秒)
+    dataA = actual_change_car_data(dataA)
+    # 在每段時間，找到車輛中心點
+    center_point = kmeans(dataA)
+    return center_point
 
+def sim(dataS):
+    dataS = simulation_change_car_data(dataS)
+    center_point = kmeans(dataS)
+    return center_point
+
+def uav(location_UAV):
+    location_UAV = (location_UAV[0]+location_UAV[2],location_UAV[1],location_UAV[2])
+    return location_UAV
+
+def d1(delaytTime,location_UAV):
+    Num = 0
+    lockA = 0
+    lockS = 0
+    print("Num :",Num)
+    print("UAV : ",location_UAV)
+    o = kmeans(O_data)
+    print("act : ",o)
+    print("sim : ",o)
+    
+    Num+=1
+    while True : 
+        
+        print("Num :",Num)
+
+        if Num>delaytTime:
+            location_UAV = uav(location_UAV)
+        print("UAV : ",location_UAV)
+
+        if lockA == 0 :
+            a = act(dataA)
+            print("act : ",a)
+            if a[0] < location_UAV[0] :
+                lockA = 1
+                dA = a[0]
+                print("okok")
+        else : 
+            print("act : ",a,"okok")
+
+                
+        
+
+        if lockS == 0 : 
+            s = sim(dataS)
+            print("sim : ",s)
+            if s[0] < location_UAV[0] :
+                lockS = 1
+                dS = s[0]
+                print("okok")
+        else : 
+            print("sim : ",s,"okok")
+        
+
+        
+        print()
+    
+        # 無人機追上實際
+        
+        if ((lockA == 1) and (lockS == 1)) :
+            D = abs(dA-dS)
+            # print("D = ",D)
+            break
+
+        Num += 1
+    return D
 
 
 car_num = 10
 # O_data=create_car(car_num)
 O_data = [[36, 0, 19], [88, 3, 22], [53, 3, 20], [65, 3, 16], [18, 3, 18], [24, 3, 21], [92, 3, 27], [37, 3, 23], [91, 0, 26], [50, 3, 24]]
-dataN = copy.deepcopy(O_data)
-center_point = kmeans(dataN)
+
+dataA = copy.deepcopy(O_data)
+dataS = copy.deepcopy(O_data)  
 V_UAV = 35
-#無人機時速126km/hr(35m/s)
+delaytTime = 3 #(s)
 location_UAV=(0,0,V_UAV)  #無人機初始位置
 
-d =((location_UAV[0]-center_point[0])**2+(location_UAV[1]-center_point[1])**2)**0.5
-t = round(d/35,3)
-print("初始車輛位置 : ",O_data)
-print("初始中心點 : ",center_point) #k1
-print("初始無人機位置 : ",(location_UAV[0],location_UAV[1]))
-print("距離相差 : ",d)
-print("無人機飛行時間 :",t)
-
-
-#以0.5秒為單位，車子等速前進
-# for i in range(0,int(t/0.5)):
-#     dataN = simulation_change_car_data(dataN)
-
-dataN = constant_speed(dataN,t)
-
-New_center = kmeans(dataN)
-print("實際車輛中心點為 : ",New_center)  #k2
-
-ans = ((New_center[0]-center_point[0])**2+(New_center[1]-center_point[1])**2)**0.5
-print("兩點相差距離 : ",ans)
-
-
+d1 = d1(delaytTime,location_UAV)
+print("D = ",d1)

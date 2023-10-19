@@ -22,29 +22,32 @@ t.start()
 
 #車輛數X
 car_num=5
-car=[]
+data=[]
 
 #車輛初始位置(x,y,v)
 for i  in range(1,car_num+1):
     x = random.randint(0,100)
     y = random.choice([0,3])
     v = random.randint(20,100)
-    car.append([x,y,v])  # 將新的 [x, y, v] 值添加到 car 列表
-print(car_num,"台車" , "座標為" , car)
+    data.append([x,y,v])  # 將新的 [x, y, v] 值添加到 car 列表
+print(car_num,"台車" , "座標為" , data)
 t=1
 while running:
     
     for j  in range(0,car_num):    
-        car[j][0] = round((car[j][0] + car[j][2]),3)  #車輛X座標改變
+        #車輛X座標改變
+        data[j][0] = round((data[j][0] + data[j][2]),3)  
         k = random.random()
-        if k > 0.2 :  #更改Y(車道) 
-            if car[j][1] == 0:
-                car[j][1] = 3
-            else: car[j][1] = 0        
+        #更改Y(車道) 80%改變車道
+        if k > 0.2 :  
+            if data[j][1] == 0:
+                data[j][1] = 3
+            else: data[j][1] = 0      
+        #改變車輛速度  (10% ~ -10%)
         a = random.uniform(0.1,-0.1) 
-        New_v = car[j][2] * (1+a)
-        car[j][2] = round(New_v,3) #更改車輛速度
-    print(car_num,"台車Time", t , "座標為" , car)
+        New_v = data[j][2] * (1+a)
+        data[j][2] = round(New_v,3) 
+    print(car_num,"台車, Time", t , "座標為" , data)
     # if keyboard.read_key() == "p":
     #     print("You pressed p")
     #     break
